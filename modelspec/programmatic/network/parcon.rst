@@ -1103,7 +1103,7 @@ ParallelContext
 
         A better evaluation of load balance (accounting for dynamic load
         imbalance as well as static load imbalance) is
-	(average step_time / maximum (step_time + step_wait))
+	(average step_time / maximum (step_time + step_wait + transfer_time(3)))
 
         Note that if static load imbalance dominates the load imbalance,
         then one expects the minimum step_wait to be close to 0.
@@ -1178,10 +1178,13 @@ ParallelContext
 
         ``reducedtree_computation_time = pc.vtransfer_time(2)``
 
+        ``transfer_barrier_time = pc.vtransfer_time(3)``
+
 
     Description:
         The amount of time (seconds) 
         spent transferring and waiting for voltages or matrix elements. 
+        This includes the transfer barrier time.
         The :func:`integ_time` is reduced by transfer and splitcell exchange times. 
          
         splitcell_exchange_time includes the reducedtree_computation_time. 
@@ -1191,7 +1194,12 @@ ParallelContext
         send and receive of matrix information. This amount is also included 
         in the splitcell_exchange_time. 
 
-         
+        transfer_barrier_time is the time spent in MPI_Barrier just prior
+        to the MPI_Alltoallv call for exchange of voltages on each time step.
+        The MPI_Barrier is used only if :func:`step_wait` is not turned off
+        by using the -1 argument (in which case pc.vtransfer_time(3) will
+        return 0.  The intention is to allow a better indication of load
+        balance when voltage exchange is occurring.
 
 ----
 
